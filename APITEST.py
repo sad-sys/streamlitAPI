@@ -70,7 +70,7 @@ def main():
 
     if st.button("Search Flights"):
         # Set OpenAI key
-        openai.api_key = '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'
+        openai.api_key = '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'
         
         # Formulate conversation for OpenAI API
         conversation = [
