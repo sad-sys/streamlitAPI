@@ -15,7 +15,8 @@ def get_flights(query_string):
     print ('•••••••••••••••••••••••••••••••')
     print (response)
     data = response.json()
-    return data['data']['flights']
+    print(data)
+    return data['data']['flights'][0]  # Return only the first flight
 
 def show_flights(flights):
     for i, flight in enumerate(flights, 1):
@@ -41,11 +42,11 @@ def show_flights(flights):
                 st.write(f"\t\tDistance (km): {leg['distanceInKM']}")
                 st.write(f"\t\tIs International: {leg['isInternational']}")
 
-def generate_advert(flights):
+def generate_advert(flight):
     # Start a conversation for OpenAI API
     conversation = [
         {"role": "system", "content": "You are a creative AI, trained to generate engaging and attractive advertisements for flights."},
-        {"role": "user", "content": f"I have the following flights available: {flights}. Can you create an advertisement based on this information?"}
+        {"role": "user", "content": f"I have the following flight available: {flight}. Can you create an advertisement based on this information?"}
     ]
     
     # Make OpenAI API request
@@ -60,7 +61,7 @@ def generate_advert(flights):
     advert_text = response['choices'][0]['message']['content']
     
     return advert_text
-
+#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
 
 def main():
     st.title("Flight Search")
@@ -69,7 +70,7 @@ def main():
 
     if st.button("Search Flights"):
         # Set OpenAI key
-        openai.api_key = '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'
+        openai.api_key = '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'
         
         # Formulate conversation for OpenAI API
         conversation = [
@@ -87,18 +88,34 @@ def main():
         )
         
         # Extract query string
+        
         response_content = response['choices'][0]['message']['content']
+
+        print("API Response content:", response_content)  # Debugging print statement
+
         pattern = r'querystring\s*=\s*({[^}]+})'
+
         matches = re.findall(pattern, response_content)
+        print("Matches:", matches)  # Debugging print statement
         query_string = ast.literal_eval(matches[0]) if matches else None
-        print (query_string)
-        # If query string found, get and show flights
+        print("Query String:", query_string)  # Debugging print statement
+
+        # If query string found, get and show flight
         if query_string:
-            flights = get_flights(query_string)
-            
-            show_flights(flights)
+            flight = get_flights(query_string)  # Adjusted to retrieve single flight
+
+            # Generate an advertisement for the flight
+            advert_text = generate_advert(flight)
+            st.write("Here's a unique advertisement for your flight:")
+            st.write(advert_text)
+
+            st.write("And here is the detailed flight information:")
+            show_flights([flight])  # Adjusted to handle single flight
         else:
             st.write("Sorry, could not formulate the trip data.")
+
+
+
 
 
 if __name__ == "__main__":
